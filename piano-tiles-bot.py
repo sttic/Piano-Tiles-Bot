@@ -33,14 +33,17 @@ class Tile:
 def click(x, y, speed_compensation=0, offset=0):
     x = x + origin[0]
     y = y + origin[1] + speed_compensation + offset
-    if x > bounds[0] and x < bounds[2] and y > bounds[1] and y < bounds[3]:
+    if in_bounds(x, y):
         pyautogui.click(x=x, y=y, clicks=num_clicks)
+
+def in_bounds(x, y):
+    return x > bounds[0] and x < bounds[2] and y > bounds[1] and y < bounds[3]
 
 bounds = (64, 0, 395, 590)
 origin, screen_width, screen_height = bounds[:2], bounds[2] - bounds[0], bounds[3] - bounds[1]
 tile_height, num_lanes = 150, 4
 threshold = 3
-color_gap, num_clicks = 16, 3
+color_gap, num_clicks = 16, 4
 
 x = lambda i: screen_width/(2*num_lanes) + i*screen_width/num_lanes
 sensors = [x(i) for i in range(num_lanes)]
@@ -53,4 +56,8 @@ while True:
     current_tiles.sort(key=lambda tile: tile.y, reverse=True)
 
     for tile in current_tiles:
+        x, y = pyautogui.position()
+        if not in_bounds(x, y):
+            exit()
+
         click(tile.x, tile.y, offset=64)
